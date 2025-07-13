@@ -12,13 +12,14 @@ const NuevaContra: React.FC = () => {
   const [codigo, setCodigo] = useState('');
   const [nuevaContra, setNuevaContra] = useState('');
   const [confirmarContra, setConfirmarContra] = useState('');
+  const [holder, setHolder] = useState('');
 
  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMensaje('');
     setError('');
 
-    if (!codigo || !nuevaContra || !confirmarContra) {
+    if (!codigo || !nuevaContra || !confirmarContra || !holder) {
       setError('Completa todos los campos.');
       return;
     }
@@ -69,7 +70,7 @@ const NuevaContra: React.FC = () => {
         )}
         <form onSubmit={handleSubmit}>
           <div className="mb-3 text-start">
-            <label htmlFor="code" className="form-label text-light">Código:</label>
+            <label htmlFor="code" className="form-label text-light">Correo:</label>
             <input
               type="text"
               className="form-control rounded-pill"
@@ -79,6 +80,18 @@ const NuevaContra: React.FC = () => {
               onChange={e => setCodigo(e.target.value)}
               required
             />
+          </div>
+          <div className="mb-3 text-start">
+          <label htmlFor="codigo" className="form-label text-light">Código:</label>
+          <input
+          type="text"
+          className="form-control rounded-pill"
+          id="holder"
+          name="holder"
+          value={holder}
+          onChange={e => setHolder(e.target.value)}
+          required
+          />
           </div>
           <div className="mb-3 text-start">
             <label htmlFor="newPassword" className="form-label text-light">Nueva contraseña:</label>
