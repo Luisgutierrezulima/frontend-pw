@@ -25,13 +25,11 @@ const EditarJuego: React.FC<EditarJuegoProps> = ({ id, onFinish }) => {
   const [oferta, setOferta] = useState(false);
   const [plataforma, setPlataforma] = useState('');
   const [categoria, setCategoria] = useState('');
-  const [mensaje, setMensaje] = useState('');
+  const [porcentaje, setPorcentaje] = useState('');
   const [error, setError] = useState('');
 
-  // Cargar datos del juego al montar el componente
   useEffect(() => {
     const cargarJuego = async () => {
-      setMensaje('');
       setError('');
       const res = await fetch(`${BACKEND_URL}/api/juegos/${id}`);
       if (res.ok) {
@@ -45,23 +43,35 @@ const EditarJuego: React.FC<EditarJuegoProps> = ({ id, onFinish }) => {
         setOferta(juego.oferta);
         setPlataforma(juego.plataforma);
         setCategoria(juego.categoria);
-        setMensaje('Juego cargado. Puedes editar los campos.');
       } else {
         setError('No se encontró el juego con ese ID.');
       }
     };
     cargarJuego();
-    // eslint-disable-next-line
   }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMensaje('');
     setError('');
     if (!titulo || !descripcion || !imagen || !trailer || !precio || !plataforma || !categoria) {
       setError('Completa todos los campos obligatorios.');
       return;
     }
+
+    let nuevoPrecio = parseFloat(precio);
+    let aplicarOferta = oferta;
+
+    if (porcentaje) {
+      const descuento = parseFloat(porcentaje);
+      if (descuento >= 1 && descuento <= 100) {
+        nuevoPrecio = nuevoPrecio - (nuevoPrecio * (descuento / 100));
+        aplicarOferta = true;
+      } else {
+        setError('El porcentaje de descuento debe estar entre 1 y 100.');
+        return;
+      }
+    }
+
     const res = await fetch(`${BACKEND_URL}/api/juegos/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -71,15 +81,15 @@ const EditarJuego: React.FC<EditarJuegoProps> = ({ id, onFinish }) => {
         estrellas,
         imagen,
         trailer,
-        precio: parseFloat(precio),
-        oferta,
+        precio: nuevoPrecio,
+        oferta: aplicarOferta,
         plataforma,
         categoria,
       }),
     });
+
     if (res.ok) {
-      setMensaje('¡Juego actualizado exitosamente!');
-      setTimeout(() => onFinish(), 1000);
+      onFinish();
     } else {
       const data = await res.json();
       setError(data.error || 'Error al actualizar el juego.');
@@ -87,9 +97,7 @@ const EditarJuego: React.FC<EditarJuegoProps> = ({ id, onFinish }) => {
   };
 
   return (
-    <div className="container mt-5">
-      <h3 className="mb-4">Editar Juego</h3>
-      {mensaje && <div className="alert alert-success">{mensaje}</div>}
+    <div className="container mt-4">
       {error && <div className="alert alert-danger">{error}</div>}
       <form className="row g-3" onSubmit={handleSubmit}>
         <div className="col-md-6">
@@ -113,23 +121,34 @@ const EditarJuego: React.FC<EditarJuegoProps> = ({ id, onFinish }) => {
           <input type="number" className="form-control form-control-sm" value={precio} onChange={e => setPrecio(e.target.value)} />
         </div>
         <div className="col-md-4">
-          <label className="form-label">Oferta</label>
-          <input type="checkbox" className="form-check-input ms-2" checked={oferta} onChange={e => setOferta(e.target.checked)} />
-        </div>
-        <div className="col-md-4">
           <label className="form-label">Plataforma*</label>
           <select className="form-select form-select-sm" value={plataforma} onChange={e => setPlataforma(e.target.value)}>
             <option value="">Selecciona una plataforma</option>
-            {plataformas.map((p) => (
+            {plataformas.map(p => (
               <option key={p} value={p}>{p}</option>
             ))}
           </select>
         </div>
         <div className="col-md-4">
+          <label className="form-label">Oferta</label>
+          <input type="checkbox" className="form-check-input ms-2" checked={oferta} onChange={e => setOferta(e.target.checked)} />
+        </div>
+        <div className="col-md-4">
+          <label className="form-label">% Descuento</label>
+          <input
+            type="number"
+            className="form-control form-control-sm"
+            value={porcentaje}
+            onChange={e => setPorcentaje(e.target.value)}
+            min={1}
+            max={100}
+          />
+        </div>
+        <div className="col-md-4">
           <label className="form-label">Categoría*</label>
           <select className="form-select form-select-sm" value={categoria} onChange={e => setCategoria(e.target.value)}>
             <option value="">Selecciona una categoría</option>
-            {categorias.map((c) => (
+            {categorias.map(c => (
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
@@ -146,4 +165,5 @@ const EditarJuego: React.FC<EditarJuegoProps> = ({ id, onFinish }) => {
     </div>
   );
 };
+
 export default EditarJuego;

@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaPercent } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import Navbar from '../componentes/Navbar';
 import Agregarjuego from '../componentes/Agregarjuego';
 import EditarJuego from '../componentes/Editarjuego';
 import EliminarJuego from '../componentes/Eliminarjuego';
-import AgregarDescuento from '../componentes/Agregardescuento';
 import { BACKEND_URL } from '../types/api';
+
+import { Modal } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 type Juego = {
   id: number;
@@ -19,8 +21,8 @@ const Configjuegos = () => {
   const [juegos, setJuegos] = useState<Juego[]>([]);
   const [loading, setLoading] = useState(true);
   const [accion, setAccion] = useState<{ tipo: string; id?: number }>({ tipo: '' });
+  const [mostrarModal, setMostrarModal] = useState(false);
 
-  // Cargar juegos del backend
   const cargarJuegos = async () => {
     setLoading(true);
     const res = await fetch(`${BACKEND_URL}/api/juegos`);
@@ -33,22 +35,23 @@ const Configjuegos = () => {
     cargarJuegos();
   }, []);
 
-  // Handlers para acciones
-  const handleAgregar = () => setAccion({ tipo: 'agregar' });
-  const handleEditar = (id: number) => setAccion({ tipo: 'editar', id });
-  const handleEliminar = (id: number) => setAccion({ tipo: 'eliminar', id });
-  const handleDescuento = (id: number) => setAccion({ tipo: 'descuento', id });
+  const handleAbrirModal = (tipo: string, id?: number) => {
+    setAccion({ tipo, id });
+    setMostrarModal(true);
+  };
 
-  // Renderiza el formulario correspondiente según la acción
+  const handleCerrarModal = () => {
+    setAccion({ tipo: '' });
+    setMostrarModal(false);
+  };
+
   const renderFormulario = () => {
     if (accion.tipo === 'agregar')
-      return <Agregarjuego onFinish={() => { setAccion({ tipo: '' }); cargarJuegos(); }} />;
+      return <Agregarjuego onFinish={() => { handleCerrarModal(); cargarJuegos(); }} />;
     if (accion.tipo === 'editar' && accion.id)
-      return <EditarJuego id={accion.id} onFinish={() => { setAccion({ tipo: '' }); cargarJuegos(); }} />;
+      return <EditarJuego id={accion.id} onFinish={() => { handleCerrarModal(); cargarJuegos(); }} />;
     if (accion.tipo === 'eliminar' && accion.id)
-      return <EliminarJuego id={accion.id} onFinish={() => { setAccion({ tipo: '' }); cargarJuegos(); }} />;
-    if (accion.tipo === 'descuento' && accion.id)
-      return <AgregarDescuento id={accion.id} onFinish={() => { setAccion({ tipo: '' }); cargarJuegos(); }} />;
+      return <EliminarJuego id={accion.id} onFinish={() => { handleCerrarModal(); cargarJuegos(); }} />;
     return null;
   };
 
@@ -57,8 +60,8 @@ const Configjuegos = () => {
       <Navbar />
       <div className="container mt-5">
         <h2 className="mb-4 text-center">Administración de Juegos</h2>
-        <button className="btn btn-success mb-3" onClick={handleAgregar}>
-          <FaPlus /> Agregar juego
+        <button className="btn btn-success mb-3" onClick={() => handleAbrirModal('agregar')}>
+          <FaPlus /> Agregar
         </button>
         {loading ? (
           <p>Cargando...</p>
@@ -83,14 +86,11 @@ const Configjuegos = () => {
                   <td>${juego.precio}</td>
                   <td>{juego.oferta ? 'Sí' : 'No'}</td>
                   <td>
-                    <button className="btn btn-primary btn-sm me-2" onClick={() => handleEditar(juego.id)}>
+                    <button className="btn btn-primary btn-sm me-2" onClick={() => handleAbrirModal('editar', juego.id)}>
                       <FaEdit />
                     </button>
-                    <button className="btn btn-danger btn-sm me-2" onClick={() => handleEliminar(juego.id)}>
+                    <button className="btn btn-danger btn-sm" onClick={() => handleAbrirModal('eliminar', juego.id)}>
                       <FaTrash />
-                    </button>
-                    <button className="btn btn-warning btn-sm" onClick={() => handleDescuento(juego.id)}>
-                      <FaPercent />
                     </button>
                   </td>
                 </tr>
@@ -98,8 +98,20 @@ const Configjuegos = () => {
             </tbody>
           </table>
         )}
-        <div className="mt-4">{renderFormulario()}</div>
       </div>
+
+      <Modal show={mostrarModal} onHide={handleCerrarModal} centered size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {accion.tipo === 'agregar' && 'Agregar juego'}
+            {accion.tipo === 'editar' && 'Editar juego'}
+            {accion.tipo === 'eliminar' && 'Eliminar juego'}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {renderFormulario()}
+        </Modal.Body>
+      </Modal>
     </>
   );
 };

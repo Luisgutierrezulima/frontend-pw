@@ -61,7 +61,6 @@ const Agregarjuego: React.FC<AgregarJuegoProps> = ({ onFinish }) => {
 
   return (
     <div className="container mt-5">
-      <h3 className="mb-4">Agregar Juego</h3>
       {mensaje && <div className="alert alert-success">{mensaje}</div>}
       {error && <div className="alert alert-danger">{error}</div>}
       <form className="row g-3" onSubmit={handleSubmit}>
@@ -86,10 +85,6 @@ const Agregarjuego: React.FC<AgregarJuegoProps> = ({ onFinish }) => {
           <input type="number" className="form-control form-control-sm" value={precio} onChange={e => setPrecio(e.target.value)} />
         </div>
         <div className="col-md-4">
-          <label className="form-label">Oferta</label>
-          <input type="checkbox" className="form-check-input ms-2" checked={oferta} onChange={e => setOferta(e.target.checked)} />
-        </div>
-        <div className="col-md-4">
           <label className="form-label">Plataforma*</label>
           <select className="form-select form-select-sm" value={plataforma} onChange={e => setPlataforma(e.target.value)}>
             <option value="">Selecciona una plataforma</option>
@@ -97,6 +92,10 @@ const Agregarjuego: React.FC<AgregarJuegoProps> = ({ onFinish }) => {
               <option key={p} value={p}>{p}</option>
             ))}
           </select>
+        </div>
+        <div className="col-md-4">
+          <label className="form-label">Oferta</label>
+          <input type="checkbox" className="form-check-input ms-2" checked={oferta} onChange={e => setOferta(e.target.checked)} />
         </div>
         <div className="col-md-4">
           <label className="form-label">Categoría*</label>
@@ -119,4 +118,5 @@ const Agregarjuego: React.FC<AgregarJuegoProps> = ({ onFinish }) => {
     </div>
   );
 };
+
 export default Agregarjuego;
