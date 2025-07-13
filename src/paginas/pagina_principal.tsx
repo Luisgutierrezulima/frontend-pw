@@ -41,7 +41,7 @@ export default function PaginaPrincipal() {
       <div className="container mt-5">
         <h3 className="texto-acento mb-3">Featured Games</h3>
         <div className="row row-cols-1 row-cols-md-5 g-4 mt-3">
-          {juegos.slice(0, 5).map((juego) => (
+          {juegos.slice(0, 10).map((juego) => (
             <div className="col" key={juego.id}>
               <CardJuego 
                 nombre={juego.titulo} 
